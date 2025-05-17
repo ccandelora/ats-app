@@ -22,7 +22,7 @@ A modern web application that analyzes your resume against job descriptions, che
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/ats-app.git
+   git clone https://github.com/ccandelora/ats-app.git
    cd ats-app
    ```
 

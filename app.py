@@ -19,6 +19,14 @@ try:
 except ImportError as e:
     logging.error(f"Error importing file sanitizer: {e}")
     FILE_SANITIZER_AVAILABLE = False
+    
+# Import security utils
+try:
+    from utils.security import init_security, ContentSecurityPolicy
+    SECURITY_AVAILABLE = True
+except ImportError as e:
+    logging.error(f"Error importing security module: {e}")
+    SECURITY_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(
@@ -144,6 +152,25 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
 
+# Initialize Content Security Policy and other security headers
+if SECURITY_AVAILABLE:
+    init_security(app)
+    logger.info("Security module initialized with Content Security Policy")
+    
+# Helper function to include CSP nonces in all templates
+def render_template_with_csp(*args, **kwargs):
+    """Wrapper for Flask's render_template that includes CSP nonces"""
+    # Get CSP nonces
+    csp_nonces = {}
+    if SECURITY_AVAILABLE and 'csp' in session:
+        csp_nonces = session['csp'].get_nonces()
+    
+    # Add nonces to template variables
+    kwargs.update(csp_nonces)
+    
+    # Call Flask's render_template with the updated kwargs
+    return render_template(*args, **kwargs)
+
 # File upload settings
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
@@ -264,7 +291,7 @@ def secure_file_save(uploaded_file, original_filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template_with_csp('index.html')
 
 @app.route('/analyze', methods=['POST'])
 def analyze_resume():

@@ -46,7 +46,7 @@
 - [x] Implement proper file sanitization
 - [x] Add secure document storage with expiration
 - [x] Implement CSRF protection for all forms
-- [ ] Add content security policy
+- [x] Add content security policy
 - [x] Create secure deletion of user data
 
 ## 8. Documentation and Help

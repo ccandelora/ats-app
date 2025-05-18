@@ -18,8 +18,8 @@
     {% endif %}
     
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card">
+        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-md-0">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5>ATS Score</h5>
                 </div>
@@ -51,14 +51,14 @@
             </div>
         </div>
         
-        <div class="col-md-8">
-            <div class="card">
+        <div class="col-lg-8 col-md-6 col-12">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5>Score Breakdown</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-lg-6 col-12 mb-3 mb-lg-0">
                             <div class="score-component">
                                 <div class="d-flex justify-content-between">
                                     <span>Keyword Matching</span>
@@ -82,7 +82,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
+                        <div class="col-lg-6 col-12">
                             <div class="score-component">
                                 <div class="d-flex justify-content-between">
                                     <span>Format & Structure</span>
@@ -112,41 +112,43 @@
     </div>
     
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs" id="resultsTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="keywords-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#keywords" type="button" role="tab">
-                                Keywords <span class="badge bg-primary">{{ results.match_results.matched_keywords|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="missing-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#missing" type="button" role="tab">
-                                Missing Keywords <span class="badge bg-danger">{{ results.match_results.missing_keywords|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="format-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#format" type="button" role="tab">
-                                Format Issues <span class="badge bg-warning text-dark">{{ results.format_issues|length }}</span>
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="sections-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#sections" type="button" role="tab">
-                                Resume Sections
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="heatmap-tab" data-bs-toggle="tab" 
-                                    data-bs-target="#heatmap" type="button" role="tab">
-                                Keyword Heatmap
-                            </button>
-                        </li>
-                    </ul>
+                    <div class="nav-tabs-wrapper overflow-auto">
+                        <ul class="nav nav-tabs card-header-tabs" id="resultsTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="keywords-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#keywords" type="button" role="tab">
+                                    Keywords <span class="badge bg-primary">{{ results.match_results.matched_keywords|length }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="missing-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#missing" type="button" role="tab">
+                                    Missing <span class="badge bg-danger">{{ results.match_results.missing_keywords|length }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="format-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#format" type="button" role="tab">
+                                    Format <span class="badge bg-warning text-dark">{{ results.format_issues|length }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sections-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#sections" type="button" role="tab">
+                                    Sections
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="heatmap-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#heatmap" type="button" role="tab">
+                                    Heatmap
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="tab-content" id="resultsTabsContent">
@@ -163,7 +165,7 @@
                             <div class="mt-4">
                                 <h4>Keyword Statistics</h4>
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
                                         <div class="card bg-light">
                                             <div class="card-body">
                                                 <h5 class="card-title">Keyword Match Rate</h5>
@@ -180,7 +182,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-lg-6 col-md-12">
                                         <div class="alert alert-info">
                                             <h5>Semantic Matching</h5>
                                             <p>Our system detected keywords that are semantically similar to job requirements, even if they don't match exactly.</p>
@@ -317,13 +319,13 @@
                             <p>This visualization shows where keywords from the job description appear in your resume:</p>
                             
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-lg-8 col-md-12 mb-4">
                                     <div id="resumeHeatmapText" class="resume-text-container">
                                         {% set resume_text = session.get('resume_data_id', '') %}
                                         Loading resume text...
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-lg-4 col-md-12">
                                     <div id="keywordMatchesList" class="keyword-matches-container">
                                         <!-- Will be populated by JavaScript -->
                                     </div>
@@ -345,21 +347,21 @@
     </div>
     
     <div class="row mt-4">
-        <div class="col-md-12">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h5>Next Steps</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 text-center">
-                            <div class="btn-group" role="group">
+                    <div class="row g-3">
+                        <div class="col-lg-4 col-md-6 col-12 text-center">
+                            <div class="d-grid gap-2">
                                 <a href="{{ url_for('optimization_wizard') }}" class="btn btn-lg btn-primary">
                                     <i class="fas fa-wand-magic-sparkles"></i> Guided Optimization
                                 </a>
-                                <form action="{{ url_for('optimize_resume') }}" method="post" class="d-inline">
+                                <form action="{{ url_for('optimize_resume') }}" method="post">
                                     {{ csrf_token() }}
-                                    <button type="submit" class="btn btn-lg btn-outline-primary">
+                                    <button type="submit" class="btn btn-lg btn-outline-primary w-100">
                                         <i class="fas fa-bolt"></i> Quick Optimize
                                     </button>
                                 </form>
@@ -367,7 +369,7 @@
                             <p class="mt-2">Optimize your resume with our guided wizard or quick one-click process</p>
                         </div>
                         
-                        <div class="col-md-4 text-center">
+                        <div class="col-lg-4 col-md-6 col-12 text-center">
                             <form action="{{ url_for('industry_analysis') }}" method="post">
                                 {{ csrf_token() }}
                                 <div class="input-group mb-3">
@@ -388,10 +390,12 @@
                             <p>Analyze your resume for a specific industry</p>
                         </div>
                         
-                        <div class="col-md-4 text-center">
-                            <a href="{{ url_for('index') }}" class="btn btn-lg btn-outline-secondary">
-                                <i class="fas fa-upload"></i> Upload New Resume
-                            </a>
+                        <div class="col-lg-4 col-md-12 col-12 text-center">
+                            <div class="d-grid">
+                                <a href="{{ url_for('index') }}" class="btn btn-lg btn-outline-secondary">
+                                    <i class="fas fa-upload"></i> Upload New Resume
+                                </a>
+                            </div>
                             <p class="mt-2">Start over with a different resume or job description</p>
                         </div>
                     </div>
@@ -500,64 +504,43 @@ function initOptimizationProgress() {
     const quickOptimizeBtn = document.querySelector('form[action*="optimize_resume"] button');
     const optimizationOverlay = document.getElementById('optimization-overlay');
     const progressBar = document.getElementById('optimization-progress');
-    const stageText = document.getElementById('optimization-stage-text');
+    const messageEl = document.getElementById('optimization-message');
+    const stageTextEl = document.getElementById('optimization-stage-text');
     
-    if (wizardBtn) {
-        wizardBtn.addEventListener('click', function() {
-            showOptimizationProgress('Preparing Optimization Wizard...');
-        });
-    }
+    if (!wizardBtn || !quickOptimizeBtn || !optimizationOverlay || !progressBar || !messageEl || !stageTextEl) return;
     
-    if (quickOptimizeBtn) {
-        const form = quickOptimizeBtn.closest('form');
-        form.addEventListener('submit', function() {
-            showOptimizationProgress('Optimizing Resume...');
-        });
-    }
-    
-    function showOptimizationProgress(message) {
-        if (optimizationOverlay) {
-            document.getElementById('optimization-message').textContent = message;
-            optimizationOverlay.classList.remove('d-none');
-            simulateOptimizationProgress();
-        }
-    }
-    
-    function simulateOptimizationProgress() {
-        const stages = [
-            { progress: 15, text: 'Analyzing resume structure...' },
-            { progress: 25, text: 'Identifying keyword opportunities...' },
-            { progress: 40, text: 'Enhancing resume sections...' },
-            { progress: 55, text: 'Adding missing keywords...' },
-            { progress: 70, text: 'Improving action verbs...' },
-            { progress: 85, text: 'Adding quantifiable results...' },
-            { progress: 95, text: 'Finalizing optimized resume...' }
-        ];
+    // Show loading overlay when optimize button is clicked
+    quickOptimizeBtn.addEventListener('click', function(e) {
+        optimizationOverlay.classList.remove('d-none');
         
-        let currentStage = 0;
-        
-        // Update progress bar every 700ms to simulate optimization stages
+        // Simulate progress for better UX
+        let progress = 0;
         const progressInterval = setInterval(function() {
-            if (currentStage < stages.length) {
-                const stage = stages[currentStage];
-                updateProgress(stage.progress, stage.text);
-                currentStage++;
+            progress += Math.random() * 15;
+            if (progress > 100) progress = 100;
+            
+            progressBar.style.width = progress + '%';
+            progressBar.setAttribute('aria-valuenow', progress);
+            progressBar.textContent = Math.round(progress) + '%';
+            
+            // Update stage text based on progress
+            if (progress < 20) {
+                stageTextEl.textContent = 'Analyzing resume content...';
+            } else if (progress < 40) {
+                stageTextEl.textContent = 'Identifying keywords to add...';
+            } else if (progress < 60) {
+                stageTextEl.textContent = 'Enhancing content structure...';
+            } else if (progress < 80) {
+                stageTextEl.textContent = 'Improving action verbs...';
             } else {
-                // Complete the progress bar when all stages are done
-                updateProgress(100, 'Optimization complete!');
+                stageTextEl.textContent = 'Finalizing optimization...';
+            }
+            
+            if (progress >= 100) {
                 clearInterval(progressInterval);
             }
         }, 700);
-        
-        function updateProgress(percent, text) {
-            if (progressBar && stageText) {
-                progressBar.style.width = percent + '%';
-                progressBar.setAttribute('aria-valuenow', percent);
-                progressBar.textContent = percent + '%';
-                stageText.textContent = text;
-            }
-        }
-    }
+    });
 }
 </script>
 {% endblock %} 

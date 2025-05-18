@@ -43,7 +43,7 @@
 - [x] Add dark mode support
 
 ## 7. Security Enhancements
-- [ ] Implement proper file sanitization
+- [x] Implement proper file sanitization
 - [x] Add secure document storage with expiration
 - [x] Implement CSRF protection for all forms
 - [ ] Add content security policy

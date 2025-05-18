@@ -12,6 +12,14 @@ import time
 import functools
 from flask_wtf.csrf import CSRFProtect, CSRFError
 
+# Import file sanitizer
+try:
+    from utils.file_sanitizer import sanitize_file, generate_secure_filename
+    FILE_SANITIZER_AVAILABLE = True
+except ImportError as e:
+    logging.error(f"Error importing file sanitizer: {e}")
+    FILE_SANITIZER_AVAILABLE = False
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -187,6 +195,73 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
+def secure_file_save(uploaded_file, original_filename):
+    """
+    Securely save and validate an uploaded file
+    
+    Args:
+        uploaded_file: The uploaded file object from request.files
+        original_filename: The original filename
+        
+    Returns:
+        tuple: (success, file_path, error_message)
+    """
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(delete=False) as temp:
+        temp_path = temp.name
+        uploaded_file.save(temp_path)
+    
+    # Basic file validation if file sanitizer not available
+    if not FILE_SANITIZER_AVAILABLE:
+        if not allowed_file(original_filename):
+            os.unlink(temp_path)
+            allowed_extensions = ', '.join(app.config['ALLOWED_EXTENSIONS'])
+            return False, None, f"File type not allowed. Please upload one of these types: {allowed_extensions}"
+        
+        # Save to the upload folder with a secure filename
+        secure_name = secure_filename(original_filename)
+        final_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_name)
+        try:
+            os.rename(temp_path, final_path)
+            return True, final_path, ""
+        except OSError as e:
+            logger.error(f"Error saving file: {str(e)}")
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
+            return False, None, f"Error saving file: {str(e)}"
+    
+    # Use file sanitizer for comprehensive validation
+    success, sanitized_path, error_msg = sanitize_file(
+        temp_path, 
+        original_filename, 
+        {f".{ext}" for ext in app.config['ALLOWED_EXTENSIONS']}
+    )
+    
+    if not success:
+        try:
+            os.unlink(temp_path)
+        except:
+            pass
+        return False, None, error_msg
+    
+    # Generate a secure filename and save to uploads folder
+    secure_name = generate_secure_filename(original_filename)
+    final_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_name)
+    
+    try:
+        os.rename(sanitized_path, final_path)
+        return True, final_path, ""
+    except OSError as e:
+        logger.error(f"Error saving sanitized file: {str(e)}")
+        try:
+            if os.path.exists(sanitized_path):
+                os.unlink(sanitized_path)
+        except:
+            pass
+        return False, None, f"Error saving sanitized file: {str(e)}"
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -211,79 +286,77 @@ def analyze_resume():
         flash('No selected file')
         return redirect(request.url)
     
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+    # Process and sanitize the uploaded file
+    success, filepath, error = secure_file_save(file, file.filename)
+    
+    if not success:
+        flash(error)
+        return redirect(request.url)
+    
+    try:
+        # Extract text from file
+        logger.info(f"Extracting text from file: {file.filename}")
+        resume_text = extract_text_from_file(filepath)
         
-        try:
-            # Extract text from file
-            logger.info(f"Extracting text from file: {filename}")
-            resume_text = extract_text_from_file(filepath)
-            
-            # Check if there was an error in text extraction
-            if resume_text.startswith("ERROR:"):
-                flash(resume_text)
-                os.remove(filepath)
-                return redirect(request.url)
-            
-            # Save resume data
-            if DB_AVAILABLE:
-                data_id = save_resume_data(resume_text, job_description, filename, industry)
-            else:
-                # Legacy file-based storage as fallback
-                data_id = legacy_save_resume_data(resume_text, job_description, filename)
-                # Save industry selection
-                legacy_save_industry_info(data_id, industry)
-            
-            # Store only the data ID in the session
-            session['resume_data_id'] = data_id
-            
-            # Analyze resume
-            logger.info(f"Analyzing resume with ID: {data_id}")
-            analyzer = ResumeAnalyzer()
-            analysis_results = analyzer.analyze_resume(resume_text, job_description)
-            
-            # Apply industry-specific scoring if industry is specified
-            if industry != 'general':
-                logger.info(f"Applying {industry} industry scoring")
-                industry_scorer = IndustryScorer()
-                analysis_results = industry_scorer.apply_industry_scoring(
-                    analysis_results, job_description, industry
-                )
-            
-            # Save analysis results if database is available
-            if DB_AVAILABLE:
-                save_analysis_results(data_id, analysis_results)
-            
-            # Check if there was an error in analysis
-            if "error" in analysis_results:
-                flash(analysis_results["error"])
-                os.remove(filepath)
-                return redirect(request.url)
-            
-            # Clean up file after analysis
+        # Check if there was an error in text extraction
+        if resume_text.startswith("ERROR:"):
+            flash(resume_text)
             os.remove(filepath)
-            
-            elapsed_time = time.time() - start_time
-            logger.info(f"Analysis completed in {elapsed_time:.2f} seconds")
-            
-            return render_template('results.html', results=analysis_results, industry=industry)
-            
-        except Exception as e:
-            error_details = traceback.format_exc()
-            logger.error(f"Error analyzing resume: {error_details}")
-            flash(f'Error analyzing resume: {str(e)}')
-            # Try to remove the file if it exists
-            try:
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-            except:
-                pass
             return redirect(request.url)
-    else:
-        allowed_extensions = ', '.join(app.config['ALLOWED_EXTENSIONS'])
-        flash(f'File type not allowed. Please upload one of these types: {allowed_extensions}')
+        
+        # Save resume data
+        if DB_AVAILABLE:
+            data_id = save_resume_data(resume_text, job_description, file.filename, industry)
+        else:
+            # Legacy file-based storage as fallback
+            data_id = legacy_save_resume_data(resume_text, job_description, file.filename)
+            # Save industry selection
+            legacy_save_industry_info(data_id, industry)
+        
+        # Store only the data ID in the session
+        session['resume_data_id'] = data_id
+        
+        # Analyze resume
+        logger.info(f"Analyzing resume with ID: {data_id}")
+        analyzer = ResumeAnalyzer()
+        analysis_results = analyzer.analyze_resume(resume_text, job_description)
+        
+        # Apply industry-specific scoring if industry is specified
+        if industry != 'general':
+            logger.info(f"Applying {industry} industry scoring")
+            industry_scorer = IndustryScorer()
+            analysis_results = industry_scorer.apply_industry_scoring(
+                analysis_results, job_description, industry
+            )
+        
+        # Save analysis results if database is available
+        if DB_AVAILABLE:
+            save_analysis_results(data_id, analysis_results)
+        
+        # Check if there was an error in analysis
+        if "error" in analysis_results:
+            flash(analysis_results["error"])
+            os.remove(filepath)
+            return redirect(request.url)
+        
+        # Clean up file after analysis
+        os.remove(filepath)
+        
+        elapsed_time = time.time() - start_time
+        logger.info(f"Analysis completed in {elapsed_time:.2f} seconds")
+        
+        return render_template('results.html', results=analysis_results, industry=industry)
+        
+    except Exception as e:
+        error_details = traceback.format_exc()
+        logger.error(f"Error analyzing resume: {error_details}")
+        flash(f'Error analyzing resume: {str(e)}')
+        # Try to remove the file if it exists
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except:
+            pass
         return redirect(request.url)
 
 @csrf.exempt
@@ -304,56 +377,58 @@ def api_analyze_resume():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
     
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+    # Process and sanitize the uploaded file
+    success, filepath, error = secure_file_save(file, file.filename)
+    
+    if not success:
+        return jsonify({"error": error}), 400
+    
+    try:
+        # Extract text from file
+        logger.info(f"API extracting text from file: {file.filename}")
+        resume_text = extract_text_from_file(filepath)
         
-        # Use a temporary file to avoid filesystem clutter
-        with tempfile.NamedTemporaryFile(delete=False) as temp:
-            file.save(temp.name)
-            filepath = temp.name
-        
-        try:
-            # Extract text from file
-            logger.info(f"API extracting text from file: {filename}")
-            resume_text = extract_text_from_file(filepath)
-            
-            # Check if there was an error in text extraction
-            if resume_text.startswith("ERROR:"):
-                os.unlink(filepath)
-                return jsonify({"error": resume_text}), 500
-            
-            # Analyze resume
-            logger.info(f"API analyzing resume: {filename}")
-            analyzer = ResumeAnalyzer()
-            analysis_results = analyzer.analyze_resume(resume_text, job_description)
-            
-            # Apply industry-specific scoring if industry is specified
-            if industry != 'general':
-                logger.info(f"API applying {industry} industry scoring")
-                industry_scorer = IndustryScorer()
-                analysis_results = industry_scorer.apply_industry_scoring(
-                    analysis_results, job_description, industry
-                )
-            
-            # Clean up temporary file
-            os.unlink(filepath)
-            
-            elapsed_time = time.time() - start_time
-            logger.info(f"API analysis completed in {elapsed_time:.2f} seconds")
-            
-            return jsonify(analysis_results)
-        except Exception as e:
-            error_details = traceback.format_exc()
-            logger.error(f"API error: {error_details}")
-            # Clean up temporary file
+        # Check if there was an error in text extraction
+        if resume_text.startswith("ERROR:"):
             try:
-                os.unlink(filepath)
+                os.remove(filepath)
             except:
                 pass
-            return jsonify({"error": str(e)}), 500
-    else:
-        allowed_extensions = ', '.join(app.config['ALLOWED_EXTENSIONS'])
-        return jsonify({"error": f"File type not allowed. Please upload one of these types: {allowed_extensions}"}), 400
+            return jsonify({"error": resume_text}), 500
+        
+        # Analyze resume
+        logger.info(f"API analyzing resume: {file.filename}")
+        analyzer = ResumeAnalyzer()
+        analysis_results = analyzer.analyze_resume(resume_text, job_description)
+        
+        # Apply industry-specific scoring if industry is specified
+        if industry != 'general':
+            logger.info(f"API applying {industry} industry scoring")
+            industry_scorer = IndustryScorer()
+            analysis_results = industry_scorer.apply_industry_scoring(
+                analysis_results, job_description, industry
+            )
+        
+        # Clean up file
+        try:
+            os.remove(filepath)
+        except:
+            pass
+        
+        elapsed_time = time.time() - start_time
+        logger.info(f"API analysis completed in {elapsed_time:.2f} seconds")
+        
+        return jsonify(analysis_results)
+    except Exception as e:
+        error_details = traceback.format_exc()
+        logger.error(f"API error: {error_details}")
+        # Clean up file if it exists
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except:
+            pass
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/get_resume_text')
 @rate_limit  # Apply rate limiting

@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Optimization Wizard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Resume Optimization Wizard</h1>
+    
+    <div class="alert alert-info">
+        <i class="fas fa-lightbulb me-2"></i>
+        Welcome to the guided optimization wizard! Follow these steps to improve your resume for ATS compatibility.
+    </div>
+    
+    <!-- Wizard Navigation -->
+    <div class="card mb-4">
+        <div class="card-body p-0">
+            <div class="d-flex justify-content-between wizard-progress">
+                <div class="wizard-step {% if step == 'contact' %}active{% endif %} {% if step_completed.contact %}completed{% endif %}">
+                    <div class="step-number">1</div>
+                    <div class="step-name">Contact Info</div>
+                </div>
+                <div class="wizard-step {% if step == 'sections' %}active{% endif %} {% if step_completed.sections %}completed{% endif %}">
+                    <div class="step-number">2</div>
+                    <div class="step-name">Resume Sections</div>
+                </div>
+                <div class="wizard-step {% if step == 'keywords' %}active{% endif %} {% if step_completed.keywords %}completed{% endif %}">
+                    <div class="step-number">3</div>
+                    <div class="step-name">Keywords</div>
+                </div>
+                <div class="wizard-step {% if step == 'content' %}active{% endif %} {% if step_completed.content %}completed{% endif %}">
+                    <div class="step-number">4</div>
+                    <div class="step-name">Content Enhancement</div>
+                </div>
+                <div class="wizard-step {% if step == 'format' %}active{% endif %} {% if step_completed.format %}completed{% endif %}">
+                    <div class="step-number">5</div>
+                    <div class="step-name">Formatting</div>
+                </div>
+                <div class="wizard-step {% if step == 'review' %}active{% endif %} {% if step_completed.review %}completed{% endif %}">
+                    <div class="step-number">6</div>
+                    <div class="step-name">Review</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Step Content -->
+    <div class="card">
+        <div class="card-header">
+            {% if step == 'contact' %}
+                <h4>Step 1: Contact Information</h4>
+            {% elif step == 'sections' %}
+                <h4>Step 2: Resume Sections</h4>
+            {% elif step == 'keywords' %}
+                <h4>Step 3: Keyword Optimization</h4>
+            {% elif step == 'content' %}
+                <h4>Step 4: Content Enhancement</h4>
+            {% elif step == 'format' %}
+                <h4>Step 5: Formatting</h4>
+            {% elif step == 'review' %}
+                <h4>Step 6: Review and Download</h4>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('process_optimization_step') }}" method="post" id="wizardForm">
+                {{ csrf_token() }}
+                <input type="hidden" name="current_step" value="{{ step }}">
+                <input type="hidden" name="resume_id" value="{{ resume_id }}">
+                
+                {% if step == 'contact' %}
+                <!-- Contact Information Step -->
+                <div class="row g-3">
+                    <div class="col-md-6 col-12">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ contact_info.name or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ contact_info.email or '' }}">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ contact_info.phone or '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="linkedin" class="form-label">LinkedIn Profile</label>
+                            <input type="text" class="form-control" id="linkedin" name="linkedin" value="{{ contact_info.linkedin or '' }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Tip:</strong> Make sure your contact information is clearly visible at the top of your resume for ATS systems to easily identify it.
+                </div>
+                
+                {% elif step == 'sections' %}
+                <!-- Resume Sections Step -->
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-12 mb-3">
+                        <h5>Current Sections</h5>
+                        <ul class="list-group mb-3">
+                            {% for section_name, section_data in resume_sections.items() %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ section_name|capitalize }}
+                                <span class="badge bg-primary rounded-pill">{{ (section_data.content|length / 100)|int }} KB</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-lg-8 col-md-12">
+                        <h5>Section Order & Inclusion</h5>
+                        <p>Drag sections to reorder them in your optimized resume:</p>
+                        <div class="section-order-list" id="sectionOrderList">
+                            {% for section_name in section_order %}
+                            <div class="section-item" data-section="{{ section_name }}">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="included_sections" value="{{ section_name }}" 
+                                           id="include_{{ section_name }}" {% if section_name in resume_sections %}checked{% endif %}>
+                                    <label class="form-check-label" for="include_{{ section_name }}">
+                                        {{ section_name|capitalize }}
+                                    </label>
+                                </div>
+                                <i class="fas fa-grip-lines"></i>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="section_order" id="sectionOrderInput" value="{{ section_order|join(',') }}">
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Tip:</strong> Most ATS systems prefer a standard order: Summary, Experience, Education, Skills, followed by additional sections.
+                </div>
+                
+                {% elif step == 'keywords' %}
+                <!-- Keyword Optimization Step -->
+                <div class="row g-3">
+                    <div class="col-lg-6 col-md-12 mb-4">
+                        <h5>Missing Keywords</h5>
+                        <p>Select which keywords you'd like to add to your resume:</p>
+                        <div class="missing-keywords">
+                            {% for keyword in missing_keywords %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="add_keywords" value="{{ keyword }}" 
+                                       id="keyword_{{ loop.index }}" checked>
+                                <label class="form-check-label" for="keyword_{{ loop.index }}">
+                                    {{ keyword }}
+                                </label>
+                                <select class="form-select form-select-sm keyword-section-select mt-2 mt-md-0" 
+                                        name="keyword_section_{{ keyword }}">
+                                    {% for section_name in resume_sections.keys() %}
+                                    <option value="{{ section_name }}">Add to {{ section_name|capitalize }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-12">
+                        <h5>Current Keywords</h5>
+                        <div class="current-keywords">
+                            {% for match in matched_keywords %}
+                            <span class="badge bg-success m-1">{{ match.keyword }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Tip:</strong> Add keywords naturally within context. Avoid keyword stuffing, which can make your resume look less authentic.
+                </div>
+                
+                {% elif step == 'content' %}
+                <!-- Content Enhancement Step -->
+                <div class="accordion" id="contentEnhancementAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="actionVerbsHeading">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#actionVerbsCollapse">
+                                Action Verbs
+                            </button>
+                        </h2>
+                        <div id="actionVerbsCollapse" class="accordion-collapse collapse show" data-bs-parent="#contentEnhancementAccordion">
+                            <div class="accordion-body">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enhanceActionVerbs" name="enhance_action_verbs" checked>
+                                    <label class="form-check-label" for="enhanceActionVerbs">
+                                        Replace weak verbs with stronger action verbs
+                                    </label>
+                                </div>
+                                <div class="mt-3">
+                                    <p>Examples of replacements:</p>
+                                    <div class="table-responsive">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <span class="text-decoration-line-through text-danger">Was responsible for managing</span> → 
+                                                <span class="text-success">Spearheaded</span>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <span class="text-decoration-line-through text-danger">Helped with</span> → 
+                                                <span class="text-success">Facilitated</span>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <span class="text-decoration-line-through text-danger">Worked on</span> → 
+                                                <span class="text-success">Developed</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="quantifiableHeading">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#quantifiableCollapse">
+                                Quantifiable Results
+                            </button>
+                        </h2>
+                        <div id="quantifiableCollapse" class="accordion-collapse collapse" data-bs-parent="#contentEnhancementAccordion">
+                            <div class="accordion-body">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enhanceQuantifiable" name="enhance_quantifiable" checked>
+                                    <label class="form-check-label" for="enhanceQuantifiable">
+                                        Add suggestions for quantifiable results where missing
+                                    </label>
+                                </div>
+                                <div class="mt-3">
+                                    <p>Example enhancements:</p>
+                                    <div class="table-responsive">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <span class="text-decoration-line-through text-danger">Improved customer satisfaction</span> → 
+                                                <span class="text-success">Improved customer satisfaction by 35% through implementing feedback system</span>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <span class="text-decoration-line-through text-danger">Reduced operational costs</span> → 
+                                                <span class="text-success">Reduced operational costs by $50,000 annually by automating manual processes</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Tip:</strong> Strong action verbs and quantifiable achievements make your resume more impactful and demonstrate your value to potential employers.
+                </div>
+                
+                {% elif step == 'format' %}
+                <!-- Formatting Step -->
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Format Improvements</h5>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="fixFormatIssues" name="fix_format_issues" checked>
+                            <label class="form-check-label" for="fixFormatIssues">
+                                Fix formatting issues
+                            </label>
+                        </div>
+                        
+                        <div class="format-issues-list">
+                            {% if format_issues|length > 0 %}
+                                {% for issue in format_issues %}
+                                <div class="format-issue mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                                        <div>
+                                            <strong>Issue:</strong> {{ issue }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    No formatting issues detected!
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-light mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Tip:</strong> A clean, simple format without tables, columns, or graphics works best with ATS systems.
+                </div>
+                
+                {% elif step == 'review' %}
+                <!-- Review Step -->
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Resume Preview</h5>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            This is a preview. Download the DOCX file for a fully formatted version.
+                        </div>
+                        
+                        <div class="resume-preview card">
+                            <div class="card-body">
+                                <div class="resume-header mb-4 text-center">
+                                    <h3>{{ contact_info.name or 'Your Name' }}</h3>
+                                    <div class="contact-details">
+                                        {% if contact_info.email %}
+                                        <span class="me-md-3"><i class="fas fa-envelope me-1"></i> {{ contact_info.email }}</span>
+                                        {% endif %}
+                                        {% if contact_info.phone %}
+                                        <span class="me-md-3"><i class="fas fa-phone me-1"></i> {{ contact_info.phone }}</span>
+                                        {% endif %}
+                                        {% if contact_info.linkedin %}
+                                        <span><i class="fab fa-linkedin me-1"></i> {{ contact_info.linkedin }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Resume content preview (sections) -->
+                                <div class="resume-body">
+                                    {% for section_name in final_section_order %}
+                                        {% if section_name in optimized_sections %}
+                                            <div class="resume-section mb-3">
+                                                <h4 class="section-header">{{ section_name|capitalize }}</h4>
+                                                <div class="section-content">
+                                                    <pre class="optimized-content">{{ optimized_sections[section_name] }}</pre>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>Optimization Summary</h5>
+                        <div class="table-responsive">
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Keywords Added
+                                    <span class="badge bg-primary rounded-pill">{{ stats.keywords_added }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Action Verbs Enhanced
+                                    <span class="badge bg-primary rounded-pill">{{ stats.action_verbs_enhanced }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Quantifiable Results Added
+                                    <span class="badge bg-primary rounded-pill">{{ stats.quantifiable_added }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Format Issues Fixed
+                                    <span class="badge bg-primary rounded-pill">{{ stats.format_issues_fixed }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Navigation Buttons -->
+                <div class="mt-4 d-flex justify-content-between">
+                    {% if step != 'contact' %}
+                    <button type="submit" name="action" value="prev" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Previous
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-outline-secondary" disabled>
+                        <i class="fas fa-arrow-left me-2"></i> Previous
+                    </button>
+                    {% endif %}
+                    
+                    {% if step != 'review' %}
+                    <button type="submit" name="action" value="next" class="btn btn-primary">
+                        Next <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                    {% else %}
+                    <button type="submit" name="action" value="download" class="btn btn-success">
+                        <i class="fas fa-download me-2"></i> Download Optimized Resume
+                    </button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay for Wizard Steps -->
+<div id="wizard-step-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-none">
+    <div class="d-flex justify-content-center align-items-center h-100 bg-dark bg-opacity-50">
+        <div class="card p-4 text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4 id="wizard-loading-message">Processing Step...</h4>
+            <div id="wizard-loading-stage-text" class="mt-2 text-muted">
+                Please wait while we process your changes...
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading overlay when form is submitted
+    const wizardForm = document.getElementById('wizardForm');
+    const wizardOverlay = document.getElementById('wizard-step-overlay');
+    
+    if (wizardForm && wizardOverlay) {
+        wizardForm.addEventListener('submit', function() {
+            wizardOverlay.classList.remove('d-none');
+        });
+    }
+    
+    // Support for section reordering
+    const sectionOrderList = document.getElementById('sectionOrderList');
+    const sectionOrderInput = document.getElementById('sectionOrderInput');
+    
+    if (sectionOrderList && sectionOrderInput) {
+        // Simple drag and drop implementation
+        let draggedItem = null;
+        
+        document.querySelectorAll('.section-item').forEach(item => {
+            item.addEventListener('dragstart', function() {
+                draggedItem = this;
+                setTimeout(() => this.classList.add('dragging'), 0);
+            });
+            
+            item.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                updateSectionOrder();
+            });
+            
+            item.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                if (draggedItem !== this) {
+                    const allItems = Array.from(sectionOrderList.querySelectorAll('.section-item'));
+                    const draggedIndex = allItems.indexOf(draggedItem);
+                    const thisIndex = allItems.indexOf(this);
+                    
+                    if (draggedIndex < thisIndex) {
+                        sectionOrderList.insertBefore(draggedItem, this.nextSibling);
+                    } else {
+                        sectionOrderList.insertBefore(draggedItem, this);
+                    }
+                    
+                    updateSectionOrder();
+                }
+            });
+            
+            // Touch support for mobile devices
+            item.addEventListener('touchstart', function(e) {
+                draggedItem = this;
+                this.classList.add('dragging');
+            });
+            
+            item.addEventListener('touchend', function() {
+                this.classList.remove('dragging');
+                updateSectionOrder();
+            });
+            
+            item.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                const touch = e.targetTouches[0];
+                const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+                
+                for (let i = 0; i < elements.length; i++) {
+                    if (elements[i].classList.contains('section-item') && elements[i] !== this) {
+                        const allItems = Array.from(sectionOrderList.querySelectorAll('.section-item'));
+                        const draggedIndex = allItems.indexOf(draggedItem);
+                        const thisIndex = allItems.indexOf(elements[i]);
+                        
+                        if (draggedIndex < thisIndex) {
+                            sectionOrderList.insertBefore(draggedItem, elements[i].nextSibling);
+                        } else {
+                            sectionOrderList.insertBefore(draggedItem, elements[i]);
+                        }
+                        
+                        updateSectionOrder();
+                        break;
+                    }
+                }
+            });
+            
+            // Make elements draggable
+            item.setAttribute('draggable', 'true');
+        });
+        
+        function updateSectionOrder() {
+            const sections = Array.from(sectionOrderList.querySelectorAll('.section-item'))
+                .map(item => item.getAttribute('data-section'));
+            sectionOrderInput.value = sections.join(',');
+        }
+    }
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Extra CSS for optimization wizard is now moved to the main styles.css file -->
+{% endblock %} 

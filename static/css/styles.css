@@ -1,3 +1,222 @@
+/* Main Styles for ATS Resume Checker */
+
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+    --body-color: #f8f9fc;
+    --body-text-color: #333;
+    --card-border-radius: 0.35rem;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--body-color);
+    color: var(--body-text-color);
+    line-height: 1.6;
+}
+
+/* Card styles */
+.card {
+    border-radius: var(--card-border-radius);
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.25rem;
+}
+
+.card-header h5 {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+/* Score display */
+.score-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.score-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.score-circle.high {
+    background-color: var(--success-color);
+}
+
+.score-circle.medium {
+    background-color: var(--warning-color);
+    color: #333;
+}
+
+.score-circle.low {
+    background-color: var(--danger-color);
+}
+
+.score-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+/* Score component */
+.score-component {
+    margin-bottom: 1rem;
+}
+
+.score-component .progress {
+    height: 0.75rem;
+    border-radius: 1rem;
+    margin-top: 0.25rem;
+    background-color: #eaecf4;
+}
+
+/* Keyword badges and tags */
+.badge {
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    margin: 0.25rem;
+    border-radius: 0.25rem;
+}
+
+.keyword-matches {
+    margin: 1.5rem 0;
+}
+
+/* Nested accordion styling */
+.accordion-button {
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+}
+
+.accordion-body {
+    padding: 1rem;
+    background-color: #f8f9fc;
+}
+
+/* Resume content styling */
+.resume-content {
+    white-space: pre-wrap;
+    font-family: monospace;
+    padding: 1rem;
+    background-color: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.25rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Result tabs styling */
+.nav-tabs .nav-link {
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+}
+
+.tab-content {
+    padding: 1.5rem;
+}
+
+/* Upload form styling */
+.upload-form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.upload-form label {
+    font-weight: 500;
+}
+
+.upload-form .form-control {
+    border-radius: 0.25rem;
+}
+
+.upload-form textarea {
+    min-height: 200px;
+}
+
+/* Footer styling */
+.footer {
+    background-color: #f8f9fc;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+}
+
+/* Compatibility with dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --body-color: #1a1a1a;
+        --body-text-color: #f8f9fc;
+    }
+    
+    .card,
+    .accordion-body,
+    .card-header,
+    .footer {
+        background-color: #2d2d2d;
+        color: #f8f9fc;
+    }
+    
+    .card-header {
+        border-color: #444;
+    }
+    
+    .alert-success,
+    .alert-info,
+    .alert-warning,
+    .alert-danger {
+        color: #f8f9fc;
+    }
+    
+    .alert-success {
+        background-color: rgba(28, 200, 138, 0.3);
+        border-color: rgba(28, 200, 138, 0.5);
+    }
+    
+    .alert-info {
+        background-color: rgba(54, 185, 204, 0.3);
+        border-color: rgba(54, 185, 204, 0.5);
+    }
+    
+    .alert-warning {
+        background-color: rgba(246, 194, 62, 0.3);
+        border-color: rgba(246, 194, 62, 0.5);
+    }
+    
+    .alert-danger {
+        background-color: rgba(231, 74, 59, 0.3);
+        border-color: rgba(231, 74, 59, 0.5);
+    }
+    
+    .text-muted {
+        color: #aaa !important;
+    }
+}
+
 /* Custom styles for ATS Resume Checker */
 
 body {
@@ -34,9 +253,291 @@ body {
     padding: 1rem;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Enhanced responsive adjustments */
+@media (max-width: 1200px) {
+    .display-1 {
+        font-size: 3.5rem;
+    }
+    
+    .upload-form {
+        max-width: 90%;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 992px) {
     .display-1 {
         font-size: 3rem;
+    }
+    
+    .score-circle {
+        width: 100px;
+        height: 100px;
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .step-name {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .display-1 {
+        font-size: 2.5rem;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    h4 {
+        font-size: 1.3rem;
+    }
+    
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .wizard-step .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
+    }
+    
+    .step-name {
+        font-size: 0.7rem;
+    }
+    
+    .resume-content {
+        max-height: 300px;
+    }
+    
+    .badge {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .contact-details {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .contact-details span {
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-1 {
+        font-size: 2rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .wizard-progress {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 15px 10px;
+    }
+    
+    .wizard-step {
+        min-width: 85px;
+    }
+    
+    .score-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+    }
+    
+    .footer {
+        font-size: 0.8rem;
+    }
+    
+    .nav-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    .upload-form {
+        padding: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .keyword-section-select {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .form-check-label {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Wizard Styles */
+.wizard-progress {
+    padding: 20px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.wizard-progress::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: #dee2e6;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.wizard-step {
+    position: relative;
+    z-index: 2;
+    background: white;
+    width: 16.666%;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-weight: bold;
+    color: #6c757d;
+    border: 2px solid #dee2e6;
+}
+
+.wizard-step.active .step-number {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.wizard-step.completed .step-number {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.step-name {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.wizard-step.active .step-name {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.wizard-step.completed .step-name {
+    color: var(--success-color);
+}
+
+.section-order-list {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 10px;
+}
+
+.section-item {
+    padding: 8px;
+    margin-bottom: 5px;
+    background: #f8f9fa;
+    border-radius: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+}
+
+.section-item:active {
+    cursor: grabbing;
+}
+
+.section-item i {
+    color: #6c757d;
+}
+
+.keyword-section-select {
+    width: auto;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.resume-preview {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.optimized-content {
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Mobile-friendly contact details */
+.contact-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    .contact-details {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Compatibility with dark mode for wizard */
+@media (prefers-color-scheme: dark) {
+    .wizard-step {
+        background-color: #2d2d2d;
+    }
+    
+    .wizard-progress::before {
+        background: #444;
+    }
+    
+    .step-number {
+        background: #444;
+        border-color: #555;
+    }
+    
+    .section-item {
+        background: #333;
     }
 } 

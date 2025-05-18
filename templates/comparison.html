@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Comparison{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Resume Comparison</h1>
+    
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="card-title mb-0">Original Resume</h3>
+                </div>
+                <div class="card-body">
+                    <div class="score-circle mb-3 mx-auto" style="width: 120px; height: 120px; border-radius: 60px; background-color: {% if original.match_results.combined_score >= 80 %}#28a745{% elif original.match_results.combined_score >= 60 %}#ffc107{% else %}#dc3545{% endif %}; color: white; display: flex; justify-content: center; align-items: center;">
+                        <h2 class="mb-0">{{ original.match_results.combined_score }}%</h2>
+                    </div>
+                    <h4 class="text-center">ATS Compatibility Score</h4>
+                    
+                    <div class="mt-4">
+                        <h5>Keyword Matches: {{ original.match_results.matched_keywords|length }}</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: {{ original.match_results.exact_match_score }}%;" aria-valuenow="{{ original.match_results.exact_match_score }}" aria-valuemin="0" aria-valuemax="100">{{ original.match_results.exact_match_score }}%</div>
+                        </div>
+                        
+                        <h5>ATS Format Score: {{ (original.match_results.component_scores.formatting * 100)|round|int }}%</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (original.match_results.component_scores.formatting * 100)|round|int }}%;" aria-valuenow="{{ (original.match_results.component_scores.formatting * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100">{{ (original.match_results.component_scores.formatting * 100)|round|int }}%</div>
+                        </div>
+                        
+                        <h5>Section Organization: {{ (original.match_results.component_scores.section_organization * 100)|round|int }}%</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (original.match_results.component_scores.section_organization * 100)|round|int }}%;" aria-valuenow="{{ (original.match_results.component_scores.section_organization * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100">{{ (original.match_results.component_scores.section_organization * 100)|round|int }}%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0">Optimized Resume</h3>
+                </div>
+                <div class="card-body">
+                    <div class="score-circle mb-3 mx-auto" style="width: 120px; height: 120px; border-radius: 60px; background-color: {% if optimized.match_results.combined_score >= 80 %}#28a745{% elif optimized.match_results.combined_score >= 60 %}#ffc107{% else %}#dc3545{% endif %}; color: white; display: flex; justify-content: center; align-items: center;">
+                        <h2 class="mb-0">{{ optimized.match_results.combined_score }}%</h2>
+                    </div>
+                    <h4 class="text-center">ATS Compatibility Score</h4>
+                    
+                    <div class="mt-4">
+                        <h5>Keyword Matches: {{ optimized.match_results.matched_keywords|length }}</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: {{ optimized.match_results.exact_match_score }}%;" aria-valuenow="{{ optimized.match_results.exact_match_score }}" aria-valuemin="0" aria-valuemax="100">{{ optimized.match_results.exact_match_score }}%</div>
+                        </div>
+                        
+                        <h5>ATS Format Score: {{ (optimized.match_results.component_scores.formatting * 100)|round|int }}%</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (optimized.match_results.component_scores.formatting * 100)|round|int }}%;" aria-valuenow="{{ (optimized.match_results.component_scores.formatting * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100">{{ (optimized.match_results.component_scores.formatting * 100)|round|int }}%</div>
+                        </div>
+                        
+                        <h5>Section Organization: {{ (optimized.match_results.component_scores.section_organization * 100)|round|int }}%</h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (optimized.match_results.component_scores.section_organization * 100)|round|int }}%;" aria-valuenow="{{ (optimized.match_results.component_scores.section_organization * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100">{{ (optimized.match_results.component_scores.section_organization * 100)|round|int }}%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Improvement Details</h3>
+                </div>
+                <div class="card-body">
+                    {% set keyword_improvement = optimized.match_results.matched_keywords|length - original.match_results.matched_keywords|length %}
+                    {% set score_improvement = optimized.match_results.combined_score - original.match_results.combined_score %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Keyword Matches Improvement</h5>
+                                    <p class="card-text display-4 {% if keyword_improvement > 0 %}text-success{% elif keyword_improvement < 0 %}text-danger{% else %}text-muted{% endif %}">
+                                        {% if keyword_improvement > 0 %}+{% endif %}{{ keyword_improvement }}
+                                    </p>
+                                    <p class="card-text">
+                                        {% if keyword_improvement > 0 %}
+                                            Added {{ keyword_improvement }} new relevant keywords to your resume.
+                                        {% elif keyword_improvement == 0 %}
+                                            No change in keyword matches.
+                                        {% else %}
+                                            Reduced by {{ keyword_improvement|abs }} keyword matches.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">ATS Score Improvement</h5>
+                                    <p class="card-text display-4 {% if score_improvement > 0 %}text-success{% elif score_improvement < 0 %}text-danger{% else %}text-muted{% endif %}">
+                                        {% if score_improvement > 0 %}+{% endif %}{{ score_improvement|round|int }}%
+                                    </p>
+                                    <p class="card-text">
+                                        {% if score_improvement > 5 %}
+                                            Significant improvement in ATS compatibility score.
+                                        {% elif score_improvement > 0 %}
+                                            Moderate improvement in ATS compatibility score.
+                                        {% elif score_improvement == 0 %}
+                                            No change in ATS compatibility score.
+                                        {% else %}
+                                            Decrease in ATS compatibility score.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Keywords Added</h4>
+                        <div class="row">
+                            {% set added_keywords = [] %}
+                            {% for keyword in optimized.match_results.matched_keywords %}
+                                {% if keyword not in original.match_results.matched_keywords %}
+                                    {% set _ = added_keywords.append(keyword) %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if added_keywords|length > 0 %}
+                                {% for keyword in added_keywords %}
+                                    <div class="col-md-4 col-sm-6 mb-2">
+                                        <span class="badge bg-success p-2">{{ keyword }}</span>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-12">
+                                    <p class="text-muted">No new keywords were added.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4>Format Issues Fixed</h4>
+                        {% set original_issues = original.format_issues|length %}
+                        {% set optimized_issues = optimized.format_issues|length %}
+                        {% set fixed_issues = original_issues - optimized_issues %}
+                        
+                        <p class="card-text">
+                            {% if fixed_issues > 0 %}
+                                <span class="text-success">Fixed {{ fixed_issues }} formatting issues</span>
+                            {% elif fixed_issues == 0 and original_issues == 0 %}
+                                <span class="text-muted">No formatting issues detected in either resume.</span>
+                            {% elif fixed_issues == 0 %}
+                                <span class="text-warning">No formatting issues were fixed.</span>
+                            {% else %}
+                                <span class="text-danger">Added {{ fixed_issues|abs }} new formatting issues.</span>
+                            {% endif %}
+                        </p>
+                        
+                        {% if optimized_issues > 0 %}
+                            <h5>Remaining issues:</h5>
+                            <ul class="list-group">
+                                {% for issue in optimized.format_issues %}
+                                    <li class="list-group-item list-group-item-warning">{{ issue }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="card-title mb-0">{% if industry != 'general' %}{{ industry|title }} Industry {% endif %}Recommendations</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Next Steps to Improve Your Resume</h5>
+                        <ol>
+                            <li>Download your optimized resume using the button below.</li>
+                            <li>Review and customize the suggested changes to make them more personalized.</li>
+                            <li>Add specific metrics and achievements where placeholders are suggested.</li>
+                            {% if industry != 'general' %}
+                                <li>Emphasize your {{ industry|title }} industry-specific skills and experiences.</li>
+                                {% if optimized.feedback.industry_specific %}
+                                    <li>Focus on adding these industry-specific keywords:
+                                        <ul>
+                                            {% for item in optimized.feedback.industry_specific %}
+                                                {% if item.type == 'industry_keyword' %}
+                                                    <li>{{ item.keyword }}</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        </ol>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('download_optimized') }}" class="btn btn-lg btn-success">
+                            <i class="fas fa-download"></i> Download Optimized Resume
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

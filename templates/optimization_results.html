@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Optimization Results{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Resume Optimization Results</h1>
+    
+    <div class="alert alert-success">
+        <h4 class="alert-heading">Optimization Complete!</h4>
+        <p>Your resume has been optimized for ATS compatibility and keyword matching. Review the changes below and download your improved resume.</p>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3>Original Resume</h3>
+                </div>
+                <div class="card-body">
+                    <pre class="resume-text" style="white-space: pre-wrap; max-height: 500px; overflow-y: auto;">{{ original_resume }}</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h3>Optimized Resume</h3>
+                </div>
+                <div class="card-body">
+                    <pre class="resume-text" style="white-space: pre-wrap; max-height: 500px; overflow-y: auto;">{{ optimized_resume }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h3>Optimization Results</h3>
+                </div>
+                <div class="card-body">
+                    <div class="score-display mb-4 text-center">
+                        <div class="score-circle d-inline-block" style="width: 150px; height: 150px; border-radius: 75px; background-color: {% if results.match_results.combined_score >= 80 %}#28a745{% elif results.match_results.combined_score >= 60 %}#ffc107{% else %}#dc3545{% endif %}; color: white; display: flex; justify-content: center; align-items: center;">
+                            <h1 class="mb-0">{{ results.match_results.combined_score }}%</h1>
+                        </div>
+                        <h3 class="mt-3">ATS Compatibility Score</h3>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Keyword Matches</h4>
+                            <div class="progress mb-4">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ results.match_results.exact_match_score }}%;" aria-valuenow="{{ results.match_results.exact_match_score }}" aria-valuemin="0" aria-valuemax="100">{{ results.match_results.exact_match_score }}%</div>
+                            </div>
+                            
+                            <h5>Matched Keywords:</h5>
+                            <div class="keyword-list mb-4">
+                                {% for keyword in results.match_results.matched_keywords %}
+                                    <span class="badge bg-success p-2 m-1">{{ keyword }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if results.match_results.missing_keywords %}
+                                <h5>Still Missing Keywords:</h5>
+                                <div class="keyword-list">
+                                    {% for keyword in results.match_results.missing_keywords %}
+                                        <span class="badge bg-warning p-2 m-1">{{ keyword }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4>Component Scores</h4>
+                            
+                            <div class="mb-3">
+                                <label>Keyword Match: {{ (results.match_results.component_scores.keyword_match * 100)|round|int }}%</label>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: {{ (results.match_results.component_scores.keyword_match * 100)|round|int }}%;" aria-valuenow="{{ (results.match_results.component_scores.keyword_match * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label>Keyword Position: {{ (results.match_results.component_scores.keyword_position * 100)|round|int }}%</label>
+                                <div class="progress">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ (results.match_results.component_scores.keyword_position * 100)|round|int }}%;" aria-valuenow="{{ (results.match_results.component_scores.keyword_position * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label>Section Organization: {{ (results.match_results.component_scores.section_organization * 100)|round|int }}%</label>
+                                <div class="progress">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (results.match_results.component_scores.section_organization * 100)|round|int }}%;" aria-valuenow="{{ (results.match_results.component_scores.section_organization * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label>Formatting: {{ (results.match_results.component_scores.formatting * 100)|round|int }}%</label>
+                                <div class="progress">
+                                    <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ (results.match_results.component_scores.formatting * 100)|round|int }}%;" aria-valuenow="{{ (results.match_results.component_scores.formatting * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label>Keyword Density: {{ (results.match_results.component_scores.keyword_density * 100)|round|int }}%</label>
+                                <div class="progress">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (results.match_results.component_scores.keyword_density * 100)|round|int }}%;" aria-valuenow="{{ (results.match_results.component_scores.keyword_density * 100)|round|int }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if industry != 'general' %}
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h3>{{ industry|title }} Industry Analysis</h3>
+                </div>
+                <div class="card-body">
+                    {% if results.feedback.industry_specific %}
+                        <h4>Industry-Specific Feedback</h4>
+                        <ul class="list-group mb-4">
+                            {% for item in results.feedback.industry_specific %}
+                                {% if item.type == 'industry_advice' %}
+                                    <li class="list-group-item list-group-item-info">{{ item.suggestion }}</li>
+                                {% elif item.type == 'industry_keyword' %}
+                                    <li class="list-group-item">
+                                        <strong>Add keyword:</strong> {{ item.keyword }} - {{ item.suggestion }}
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No industry-specific feedback available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row mt-4">
+        <div class="col-md-12 text-center mb-5">
+            <div class="btn-group btn-group-lg">
+                <a href="{{ url_for('download_optimized') }}" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download Optimized Resume
+                </a>
+                <a href="{{ url_for('compare_analysis') }}" class="btn btn-primary">
+                    <i class="fas fa-chart-bar"></i> View Detailed Comparison
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

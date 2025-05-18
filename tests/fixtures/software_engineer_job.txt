@@ -1,0 +1,54 @@
+Senior Software Engineer
+
+About Us:
+Innovate Tech is a rapidly growing technology company focused on building cloud-based solutions for enterprise clients. We're looking for an experienced software engineer to join our team and help drive our next generation of products.
+
+Job Description:
+We are seeking a talented Senior Software Engineer with strong expertise in full-stack development to join our engineering team. The ideal candidate will be responsible for designing, developing, and maintaining high-performance, scalable applications while collaborating with cross-functional teams.
+
+Responsibilities:
+• Design and develop scalable, high-performance web applications
+• Build and maintain RESTful APIs to support our client applications
+• Optimize existing codebases for maximum performance and scalability
+• Lead and mentor junior developers, providing code reviews and technical guidance
+• Implement automated testing and continuous integration/deployment pipelines
+• Participate in architecture discussions and provide technical solutions
+• Collaborate with product management and UX teams to define feature specifications
+• Troubleshoot and debug critical production issues
+• Stay current with emerging technologies and industry trends
+
+Requirements:
+• Bachelor's degree in Computer Science, Engineering, or related field
+• 5+ years of experience in software development
+• Strong proficiency in Python and JavaScript/TypeScript
+• Experience with front-end frameworks such as React or Angular
+• Experience with back-end frameworks such as Django, Flask, or Express
+• Strong understanding of database design and optimization (PostgreSQL, MongoDB)
+• Experience with AWS or other cloud platforms
+• Knowledge of containerization technologies (Docker, Kubernetes)
+• Experience with CI/CD tools and methodologies
+• Excellent problem-solving and analytical skills
+• Strong communication and collaboration abilities
+• Agile/Scrum development experience
+
+Nice to Have:
+• Experience with microservices architecture
+• Data visualization experience
+• AWS certifications
+• Experience with real-time data processing
+• Open-source contributions
+• DevOps experience
+
+Benefits:
+• Competitive salary and equity options
+• Comprehensive health, dental, and vision insurance
+• 401(k) matching
+• Professional development and learning stipend
+• Flexible work arrangements
+• Unlimited PTO policy
+• Modern, collaborative work environment
+• Regular team events and activities
+
+Location: San Francisco, CA (Remote options available)
+
+Innovate Tech is an equal opportunity employer committed to diversity in the workplace. 

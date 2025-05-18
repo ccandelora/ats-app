@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ATS Resume Checker - Improve your resume's chances of passing Applicant Tracking Systems">
+    <title>{% block title %}ATS Resume Checker{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Base CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- Page-specific CSS -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-file-alt me-2"></i>
+                ATS Resume Checker
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                            <i class="fas fa-info-circle me-1"></i> About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p class="text-muted mb-0">
+                &copy; {% now 'Y' %} ATS Resume Checker | 
+                <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+            </p>
+        </div>
+    </footer>
+    
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About ATS Resume Checker</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>What is an ATS?</h4>
+                    <p>
+                        Applicant Tracking Systems (ATS) are software applications that employers use to manage job applications and screen resumes.
+                        These systems scan resumes for keywords and specific formatting to filter out candidates before a human ever sees their application.
+                    </p>
+                    
+                    <h4>How Our Tool Works</h4>
+                    <p>
+                        The ATS Resume Checker analyzes your resume against specific job descriptions to determine how well you'll rank in an ATS system.
+                        We look at keywords, formatting, section organization, and content quality to give you a comprehensive analysis.
+                    </p>
+                    
+                    <h4>Features</h4>
+                    <ul>
+                        <li>Keyword matching analysis</li>
+                        <li>Industry-specific scoring</li>
+                        <li>Format and structure validation</li>
+                        <li>Resume section identification</li>
+                        <li>AI-powered resume optimization</li>
+                        <li>Visual keyword heatmap</li>
+                    </ul>
+                    
+                    <h4>Privacy and Security</h4>
+                    <p>
+                        Your resume data is encrypted and securely stored. We do not share your information with third parties.
+                        Resume data is automatically deleted after 24 hours.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4>Privacy Policy</h4>
+                    <p>
+                        <strong>Last updated:</strong> {% now 'd M Y' %}
+                    </p>
+                    
+                    <h5>Data Collection</h5>
+                    <p>
+                        When you use our ATS Resume Checker, we collect the following data:
+                    </p>
+                    <ul>
+                        <li>Resume content you upload</li>
+                        <li>Job descriptions you provide</li>
+                        <li>Industry selections you make</li>
+                    </ul>
+                    
+                    <h5>How We Use Your Data</h5>
+                    <p>
+                        We use your data solely to:
+                    </p>
+                    <ul>
+                        <li>Analyze your resume against the job description</li>
+                        <li>Generate optimization suggestions</li>
+                        <li>Create industry-specific scoring</li>
+                    </ul>
+                    
+                    <h5>Data Retention</h5>
+                    <p>
+                        Your resume data is automatically deleted after 24 hours.
+                    </p>
+                    
+                    <h5>Data Security</h5>
+                    <p>
+                        We use industry-standard security measures to protect your data from unauthorized access or disclosure.
+                    </p>
+                    
+                    <h5>Third-Party Sharing</h5>
+                    <p>
+                        We do not share your personal information or resume data with any third parties.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Page-specific JS -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

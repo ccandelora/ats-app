@@ -1,0 +1,52 @@
+John Developer
+john.developer@example.com
+(555) 123-4567
+linkedin.com/in/johndeveloper
+github.com/johndeveloper
+
+SUMMARY
+Experienced software engineer with 5+ years of expertise in full-stack development, specialized in Python, JavaScript, and cloud technologies. Passionate about building scalable applications and implementing efficient CI/CD pipelines.
+
+EXPERIENCE
+
+Senior Software Engineer | Tech Solutions Inc. | Jan 2020 - Present
+• Led development of a customer-facing portal that improved user engagement by 45%
+• Architected and implemented RESTful APIs serving over 1M requests daily
+• Reduced cloud infrastructure costs by 30% through optimization and resource management
+• Mentored 5 junior developers, conducting code reviews and providing technical guidance
+• Implemented automated testing that increased code coverage from 65% to 92%
+
+Software Developer | DataSystems Corp | Jun 2017 - Dec 2019
+• Developed microservices architecture that improved system response time by 60%
+• Created data visualization dashboards using React and D3.js for real-time analytics
+• Collaborated with UX team to redesign the interface, resulting in 25% lower bounce rate
+• Maintained CI/CD pipelines using Jenkins and Docker for seamless deployments
+• Optimized database queries, reducing average query time from 1.2s to 0.3s
+
+Junior Developer | Web Creators LLC | Jul 2015 - May 2017
+• Built responsive web applications using HTML5, CSS3, and JavaScript
+• Integrated third-party APIs for payment processing and social media functionality
+• Participated in agile development processes, including daily stand-ups and sprints
+• Developed and maintained documentation for code and system architecture
+• Fixed critical bugs that improved application stability by 40%
+
+EDUCATION
+
+Bachelor of Science in Computer Science
+University of Technology | Graduated: May 2015
+• GPA: 3.8/4.0
+• Dean's List: 7 semesters
+• Capstone Project: Real-time Inventory Management System
+
+SKILLS
+
+Programming Languages: Python, JavaScript, TypeScript, Java, SQL, HTML/CSS
+Frameworks & Libraries: React, Node.js, Express, Django, Flask, pandas, NumPy
+Tools & Technologies: Git, Docker, Kubernetes, AWS, Azure, Jenkins, Jira
+Databases: PostgreSQL, MongoDB, MySQL, Redis
+Methodologies: Agile, Scrum, TDD, CI/CD, Microservices
+
+CERTIFICATIONS
+• AWS Certified Solutions Architect – Associate
+• Certified Scrum Master (CSM)
+• Google Cloud Professional Developer 

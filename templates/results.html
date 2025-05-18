@@ -1,265 +1,563 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Analysis Results - ATS Resume Checker</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
-    <div class="container my-5">
-        <header class="mb-5">
-            <h1 class="display-5 text-center">Resume Analysis Results</h1>
-            <div class="text-center mt-3">
-                <a href="{{ url_for('index') }}" class="btn btn-outline-primary me-2">Analyze Another Resume</a>
-                <form action="{{ url_for('optimize_resume') }}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-success">Optimize Resume for this Job</button>
-                </form>
-            </div>
-        </header>
+{% extends 'base.html' %}
 
-        <div class="row mb-4">
-            <div class="col-md-6 mx-auto">
-                <div class="card border-primary mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Overall Match Score</h4>
-                    </div>
-                    <div class="card-body text-center">
-                        <div class="display-1 mb-3">{{ results.match_results.combined_score }}%</div>
-                        <div class="row">
-                            <div class="col-6">
-                                <p class="mb-1">Keyword Match</p>
-                                <h5>{{ results.match_results.exact_match_score }}%</h5>
-                            </div>
-                            <div class="col-6">
-                                <p class="mb-1">Semantic Match</p>
-                                <h5>{{ results.match_results.semantic_match_score }}%</h5>
-                            </div>
-                        </div>
-                    </div>
+{% block title %}Resume Analysis Results{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/heatmap.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Resume Analysis Results</h1>
+    
+    {% if industry and industry != 'general' %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> 
+        Results are optimized for the <strong>{{ industry|capitalize }}</strong> industry
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>ATS Score</h5>
                 </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <!-- Contact Information -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Contact Information</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled">
-                            <li><strong>Name:</strong> {{ results.contact_info.name or "Not detected" }}</li>
-                            <li><strong>Email:</strong> {{ results.contact_info.email or "Not detected" }}</li>
-                            <li><strong>Phone:</strong> {{ results.contact_info.phone or "Not detected" }}</li>
-                            <li><strong>LinkedIn:</strong> {{ results.contact_info.linkedin or "Not detected" }}</li>
-                        </ul>
-                        
-                        <!-- Contact Information Manual Entry -->
-                        <div class="mt-3">
-                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#contactForm" aria-expanded="false" aria-controls="contactForm">
-                                Edit Contact Information
-                            </button>
-                            <div class="collapse mt-3" id="contactForm">
-                                <div class="card card-body bg-light">
-                                    <form id="manualContactForm">
-                                        <div class="mb-2">
-                                            <label for="name" class="form-label">Name</label>
-                                            <input type="text" class="form-control" id="name" name="name" value="{{ results.contact_info.name or '' }}">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" id="email" name="email" value="{{ results.contact_info.email or '' }}">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label for="phone" class="form-label">Phone</label>
-                                            <input type="text" class="form-control" id="phone" name="phone" value="{{ results.contact_info.phone or '' }}">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label for="linkedin" class="form-label">LinkedIn</label>
-                                            <input type="text" class="form-control" id="linkedin" name="linkedin" value="{{ results.contact_info.linkedin or '' }}">
-                                        </div>
-                                        <button type="button" class="btn btn-primary btn-sm mt-2" onclick="updateContactInfo()">Save</button>
-                                    </form>
-                                </div>
-                            </div>
+                <div class="card-body text-center">
+                    <div class="score-display">
+                        {% set score = results.match_results.combined_score|int %}
+                        <div class="score-circle {% if score >= 80 %}high{% elif score >= 60 %}medium{% else %}low{% endif %}">
+                            {{ score }}
                         </div>
+                        <div class="score-label">ATS Compatibility</div>
                     </div>
-                </div>
-
-                <!-- Formatting Issues -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">ATS Formatting Check</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if results.format_issues %}
-                        <div class="alert alert-warning mb-3">
-                            <h6 class="alert-heading">Potential Formatting Issues:</h6>
-                            <ul class="mb-0">
-                                {% for issue in results.format_issues %}
-                                <li>{{ issue }}</li>
-                                {% endfor %}
-                            </ul>
+                    
+                    <div class="mt-3 text-start">
+                        {% if score >= 80 %}
+                        <div class="alert alert-success">
+                            <strong>Great job!</strong> Your resume is well-optimized for ATS systems.
+                        </div>
+                        {% elif score >= 60 %}
+                        <div class="alert alert-warning">
+                            <strong>Good start!</strong> Your resume could use some improvements to better match ATS requirements.
                         </div>
                         {% else %}
-                        <div class="alert alert-success mb-0">
-                            No formatting issues detected. Your resume appears to be ATS-friendly!
+                        <div class="alert alert-danger">
+                            <strong>Needs work!</strong> Your resume needs significant optimization to perform well with ATS systems.
                         </div>
                         {% endif %}
-                    </div>
-                </div>
-
-                <!-- Keywords -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Keyword Analysis</h5>
-                    </div>
-                    <div class="card-body">
-                        <h6>Matched Keywords:</h6>
-                        <div class="mb-3">
-                            {% if results.match_results.matched_keywords %}
-                                {% for keyword in results.match_results.matched_keywords %}
-                                <span class="badge bg-success me-2 mb-2">{{ keyword }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-muted">No matching keywords found</p>
-                            {% endif %}
-                        </div>
-
-                        <h6>Missing Keywords:</h6>
-                        <div>
-                            {% if results.match_results.missing_keywords %}
-                                {% for keyword in results.match_results.missing_keywords %}
-                                <span class="badge bg-danger me-2 mb-2">{{ keyword }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-muted">No missing keywords detected</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <!-- Action Verbs -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Action Verbs</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if results.action_verbs.has_action_verbs %}
-                            <div class="alert alert-success mb-3">
-                                Your resume uses {{ results.action_verbs.count }} strong action verbs!
-                                {% if results.action_verbs.bullet_percentage %}
-                                <p class="mb-0 mt-2">{{ results.action_verbs.bullet_percentage }}% of your bullet points start with action verbs.</p>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning mb-3">
-                                No strong action verbs detected in your experience section.
-                            </div>
-                        {% endif %}
-
-                        <h6>Action Verbs Found:</h6>
-                        <div class="mb-3">
-                            {% if results.action_verbs.found %}
-                                {% for verb in results.action_verbs.found %}
-                                <span class="badge bg-success me-2 mb-2">{{ verb }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-muted">No action verbs found</p>
-                            {% endif %}
-                        </div>
-
-                        <h6>Suggested Action Verbs:</h6>
-                        <div>
-                            {% if results.action_verbs.missing %}
-                                {% for verb in results.action_verbs.missing %}
-                                <span class="badge bg-secondary me-2 mb-2">{{ verb }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-muted">No additional suggestions</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quantifiable Results -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Quantifiable Achievements</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if results.quantifiable_results.has_quantifiable_results %}
-                            <div class="alert alert-success mb-3">
-                                Your resume includes quantifiable achievements!
-                                {% if results.quantifiable_results.bullet_percentage %}
-                                <p class="mb-0 mt-2">{{ results.quantifiable_results.bullet_percentage }}% of your bullet points contain metrics or numbers.</p>
-                                {% endif %}
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning mb-0">
-                                <h6 class="alert-heading">No quantifiable achievements detected</h6>
-                                <p class="mb-0">Consider adding metrics, percentages, or specific numbers to strengthen your achievements.</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Improvement Suggestions -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Improvement Suggestions</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group">
-                            {% if results.match_results.missing_keywords %}
-                            <li class="list-group-item">
-                                <strong>Add Missing Keywords:</strong> Include some of the missing keywords where relevant in your resume.
-                            </li>
-                            {% endif %}
-                            
-                            {% if results.format_issues %}
-                            <li class="list-group-item">
-                                <strong>Fix Formatting Issues:</strong> Simplify your resume format to be more ATS-friendly.
-                            </li>
-                            {% endif %}
-                            
-                            {% if not results.action_verbs.has_action_verbs or results.action_verbs.bullet_percentage < 50 %}
-                            <li class="list-group-item">
-                                <strong>Strengthen Action Verbs:</strong> Start more bullet points with strong action verbs.
-                            </li>
-                            {% endif %}
-                            
-                            {% if not results.quantifiable_results.has_quantifiable_results or results.quantifiable_results.bullet_percentage < 30 %}
-                            <li class="list-group-item">
-                                <strong>Add Metrics:</strong> Include specific numbers, percentages, or other metrics to quantify your achievements.
-                            </li>
-                            {% endif %}
-                            
-                            {% if results.match_results.combined_score < 60 %}
-                            <li class="list-group-item">
-                                <strong>Tailor to Job Description:</strong> Customize your resume to better match the specific job description.
-                            </li>
-                            {% endif %}
-                        </ul>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="mt-4 text-center">
-            <form action="{{ url_for('optimize_resume') }}" method="post">
-                <input type="hidden" id="contact_info_data" name="contact_info_data" value="">
-                <button type="submit" class="btn btn-success btn-lg">Optimize My Resume for this Job</button>
-            </form>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Score Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="score-component">
+                                <div class="d-flex justify-content-between">
+                                    <span>Keyword Matching</span>
+                                    <span id="exact-match-score-display"></span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" id="exact-match-bar"
+                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="score-component mt-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Semantic Matching</span>
+                                    <span id="semantic-match-score-display"></span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-info" role="progressbar" id="semantic-match-bar"
+                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="score-component">
+                                <div class="d-flex justify-content-between">
+                                    <span>Format & Structure</span>
+                                    <span id="format-score-display"></span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-warning" role="progressbar" id="format-bar"
+                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="score-component mt-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Content Quality</span>
+                                    <span id="quality-score-display"></span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-primary" role="progressbar" id="quality-bar"
+                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="resultsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="keywords-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#keywords" type="button" role="tab">
+                                Keywords <span class="badge bg-primary">{{ results.match_results.matched_keywords|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="missing-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#missing" type="button" role="tab">
+                                Missing Keywords <span class="badge bg-danger">{{ results.match_results.missing_keywords|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="format-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#format" type="button" role="tab">
+                                Format Issues <span class="badge bg-warning text-dark">{{ results.format_issues|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sections-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#sections" type="button" role="tab">
+                                Resume Sections
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="heatmap-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#heatmap" type="button" role="tab">
+                                Keyword Heatmap
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="resultsTabsContent">
+                        <!-- Keywords Tab -->
+                        <div class="tab-pane fade show active" id="keywords" role="tabpanel">
+                            <h3>Matched Keywords</h3>
+                            <p>Your resume matches these important keywords from the job description:</p>
+                            <div class="keyword-matches">
+                                {% for match in results.match_results.matched_keywords %}
+                                <span class="badge bg-success m-1">{{ match.keyword }}</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h4>Keyword Statistics</h4>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Keyword Match Rate</h5>
+                                                <h1 class="display-4 text-center">
+                                                    {{ ((results.match_results.matched_keywords|length / 
+                                                       (results.match_results.matched_keywords|length + 
+                                                        results.match_results.missing_keywords|length)) * 100)|int }}%
+                                                </h1>
+                                                <p class="card-text text-center">
+                                                    {{ results.match_results.matched_keywords|length }} out of 
+                                                    {{ results.match_results.matched_keywords|length + 
+                                                       results.match_results.missing_keywords|length }} keywords matched
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="alert alert-info">
+                                            <h5>Semantic Matching</h5>
+                                            <p>Our system detected keywords that are semantically similar to job requirements, even if they don't match exactly.</p>
+                                            <p>This helps your resume get past sophisticated ATS systems that use AI to understand context.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Missing Keywords Tab -->
+                        <div class="tab-pane fade" id="missing" role="tabpanel">
+                            <h3>Missing Keywords</h3>
+                            <p>Your resume is missing these important keywords from the job description:</p>
+                            
+                            {% if results.match_results.missing_keywords|length > 0 %}
+                                <div class="missing-keywords">
+                                    {% for keyword in results.match_results.missing_keywords %}
+                                    <span class="badge bg-danger m-1">{{ keyword }}</span>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="alert alert-warning mt-4">
+                                    <h5><i class="fas fa-lightbulb"></i> Recommendation</h5>
+                                    <p>Try incorporating these missing keywords into your resume to improve your ATS score. Make sure to include them in context that reflects your actual skills and experience.</p>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h5>Get a professionally optimized resume</h5>
+                                    <form action="{{ url_for('optimize_resume') }}" method="post">
+                                        {{ csrf_token() }}
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-magic"></i> Optimize My Resume
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success">
+                                    <h5><i class="fas fa-check-circle"></i> Great job!</h5>
+                                    <p>Your resume contains all important keywords from the job description.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Format Issues Tab -->
+                        <div class="tab-pane fade" id="format" role="tabpanel">
+                            <h3>Format Issues</h3>
+                            <p>These issues might affect how Applicant Tracking Systems read your resume:</p>
+                            
+                            {% if results.format_issues|length > 0 %}
+                                <div class="list-group">
+                                    {% for issue in results.format_issues %}
+                                    <div class="list-group-item list-group-item-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> {{ issue }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="alert alert-info mt-4">
+                                    <h5><i class="fas fa-info-circle"></i> ATS Format Tips</h5>
+                                    <ul>
+                                        <li>Use a clean, simple format without tables or complex layouts</li>
+                                        <li>Include your contact information at the top</li>
+                                        <li>Use standard section headings (Experience, Education, Skills, etc.)</li>
+                                        <li>Avoid headers, footers, and page numbers</li>
+                                        <li>Use standard fonts like Arial, Calibri, or Times New Roman</li>
+                                        <li>Save your resume as a .docx or .pdf file</li>
+                                    </ul>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success">
+                                    <h5><i class="fas fa-check-circle"></i> Well formatted!</h5>
+                                    <p>No format issues detected in your resume.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Resume Sections Tab -->
+                        <div class="tab-pane fade" id="sections" role="tabpanel">
+                            <h3>Resume Sections</h3>
+                            <p>We identified these sections in your resume:</p>
+                            
+                            <div class="accordion" id="sectionsAccordion">
+                                {% for section_name, section_data in results.sections.items() %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading-{{ section_name }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                                data-bs-target="#collapse-{{ section_name }}" aria-expanded="false">
+                                            {{ section_name|capitalize }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse-{{ section_name }}" class="accordion-collapse collapse" 
+                                         aria-labelledby="heading-{{ section_name }}" data-bs-parent="#sectionsAccordion">
+                                        <div class="accordion-body">
+                                            <pre>{{ section_data.content }}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h5>Section Analysis</h5>
+                                
+                                {% set missing_sections = [] %}
+                                {% for section in ['summary', 'experience', 'education', 'skills'] %}
+                                    {% if section not in results.sections %}
+                                        {% do missing_sections.append(section) %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if missing_sections|length > 0 %}
+                                    <div class="alert alert-warning">
+                                        <h6><i class="fas fa-exclamation-triangle"></i> Missing Important Sections</h6>
+                                        <p>Your resume is missing these recommended sections:</p>
+                                        <ul>
+                                            {% for section in missing_sections %}
+                                            <li>{{ section|capitalize }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-success">
+                                        <h6><i class="fas fa-check-circle"></i> All Important Sections Present</h6>
+                                        <p>Your resume includes all recommended sections.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Keyword Heatmap Tab -->
+                        <div class="tab-pane fade" id="heatmap" role="tabpanel">
+                            <h3>Keyword Heatmap</h3>
+                            <p>This visualization shows where keywords from the job description appear in your resume:</p>
+                            
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div id="resumeHeatmapText" class="resume-text-container">
+                                        {% set resume_text = session.get('resume_data_id', '') %}
+                                        Loading resume text...
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div id="keywordMatchesList" class="keyword-matches-container">
+                                        <!-- Will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <p class="text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    <strong>Tip:</strong> Hover over highlighted keywords to see match strength. 
+                                    Click on keywords in the list to find them in your resume.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('optimization_wizard') }}" class="btn btn-lg btn-primary">
+                                    <i class="fas fa-wand-magic-sparkles"></i> Guided Optimization
+                                </a>
+                                <form action="{{ url_for('optimize_resume') }}" method="post" class="d-inline">
+                                    {{ csrf_token() }}
+                                    <button type="submit" class="btn btn-lg btn-outline-primary">
+                                        <i class="fas fa-bolt"></i> Quick Optimize
+                                    </button>
+                                </form>
+                            </div>
+                            <p class="mt-2">Optimize your resume with our guided wizard or quick one-click process</p>
+                        </div>
+                        
+                        <div class="col-md-4 text-center">
+                            <form action="{{ url_for('industry_analysis') }}" method="post">
+                                {{ csrf_token() }}
+                                <div class="input-group mb-3">
+                                    <select class="form-select" name="industry" required>
+                                        <option value="general" {% if industry == 'general' %}selected{% endif %}>General</option>
+                                        <option value="tech" {% if industry == 'tech' %}selected{% endif %}>Technology</option>
+                                        <option value="finance" {% if industry == 'finance' %}selected{% endif %}>Finance</option>
+                                        <option value="healthcare" {% if industry == 'healthcare' %}selected{% endif %}>Healthcare</option>
+                                        <option value="marketing" {% if industry == 'marketing' %}selected{% endif %}>Marketing</option>
+                                        <option value="education" {% if industry == 'education' %}selected{% endif %}>Education</option>
+                                        <option value="sales" {% if industry == 'sales' %}selected{% endif %}>Sales</option>
+                                    </select>
+                                    <button class="btn btn-secondary" type="submit">
+                                        <i class="fas fa-industry"></i> Analyze
+                                    </button>
+                                </div>
+                            </form>
+                            <p>Analyze your resume for a specific industry</p>
+                        </div>
+                        
+                        <div class="col-md-4 text-center">
+                            <a href="{{ url_for('index') }}" class="btn btn-lg btn-outline-secondary">
+                                <i class="fas fa-upload"></i> Upload New Resume
+                            </a>
+                            <p class="mt-2">Start over with a different resume or job description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay for Optimization -->
+    <div id="optimization-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-none">
+        <div class="d-flex justify-content-center align-items-center h-100 bg-dark bg-opacity-50">
+            <div class="card p-4 text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h4 id="optimization-message">Optimizing Resume...</h4>
+                <div class="progress mt-3" style="height: 20px;">
+                    <div id="optimization-progress" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                         role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" 
+                         style="width: 0%">0%</div>
+                </div>
+                <div id="optimization-stage-text" class="mt-2 text-muted">
+                    Initializing optimization...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html> 
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/heatmap.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set progress bar values
+    const exactMatchScore = {{ (results.match_results.exact_match_score * 100)|int }};
+    const semanticMatchScore = {{ (results.match_results.semantic_match_score * 100)|int }};
+    
+    let formatScore = 100 - {{ results.format_issues|length }} * 10;
+    if (formatScore < 0) formatScore = 0;
+    
+    let qualityScore = {{ results.action_verbs.count * 5 if results.action_verbs.has_action_verbs else 0 }} + 
+                      {{ 60 if results.quantifiable_results.has_quantifiable_results else 0 }};
+    if (qualityScore > 100) qualityScore = 100;
+    
+    // Update progress bars
+    updateProgressBar('exact-match-bar', 'exact-match-score-display', exactMatchScore);
+    updateProgressBar('semantic-match-bar', 'semantic-match-score-display', semanticMatchScore);
+    updateProgressBar('format-bar', 'format-score-display', formatScore);
+    updateProgressBar('quality-bar', 'quality-score-display', qualityScore);
+    
+    // Function to update progress bar
+    function updateProgressBar(barId, displayId, value) {
+        const bar = document.getElementById(barId);
+        const display = document.getElementById(displayId);
+        
+        if (bar && display) {
+            bar.style.width = value + '%';
+            bar.setAttribute('aria-valuenow', value);
+            display.textContent = value + '%';
+        }
+    }
+    
+    // Initialize optimization loading overlay
+    initOptimizationProgress();
+    
+    // Get resume text via AJAX
+    const resumeDataId = "{{ session.get('resume_data_id', '') }}";
+    if (resumeDataId) {
+        fetch('/get_resume_text?id=' + resumeDataId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.resume_text) {
+                    document.getElementById('resumeHeatmapText').innerText = data.resume_text;
+                    
+                    // Initialize heatmap - safely parse the JSON
+                    try {
+                        const keywordMatches = JSON.parse('{{ results.match_results.matched_keywords|tojson|safe }}');
+                        initResumeHeatmap('resumeHeatmapText', 'keywordMatchesList', keywordMatches);
+                    } catch (e) {
+                        console.error('Error parsing keyword matches:', e);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching resume text:', error);
+                document.getElementById('resumeHeatmapText').innerText = 
+                    'Error loading resume text. Please try refreshing the page.';
+            });
+    }
+    
+    // Initialize tooltips with forEach instead of map
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    if (tooltipTriggerList.length > 0) {
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+});
+
+/**
+ * Initialize progress tracking for optimization
+ */
+function initOptimizationProgress() {
+    const wizardBtn = document.querySelector('a[href*="optimization_wizard"]');
+    const quickOptimizeBtn = document.querySelector('form[action*="optimize_resume"] button');
+    const optimizationOverlay = document.getElementById('optimization-overlay');
+    const progressBar = document.getElementById('optimization-progress');
+    const stageText = document.getElementById('optimization-stage-text');
+    
+    if (wizardBtn) {
+        wizardBtn.addEventListener('click', function() {
+            showOptimizationProgress('Preparing Optimization Wizard...');
+        });
+    }
+    
+    if (quickOptimizeBtn) {
+        const form = quickOptimizeBtn.closest('form');
+        form.addEventListener('submit', function() {
+            showOptimizationProgress('Optimizing Resume...');
+        });
+    }
+    
+    function showOptimizationProgress(message) {
+        if (optimizationOverlay) {
+            document.getElementById('optimization-message').textContent = message;
+            optimizationOverlay.classList.remove('d-none');
+            simulateOptimizationProgress();
+        }
+    }
+    
+    function simulateOptimizationProgress() {
+        const stages = [
+            { progress: 15, text: 'Analyzing resume structure...' },
+            { progress: 25, text: 'Identifying keyword opportunities...' },
+            { progress: 40, text: 'Enhancing resume sections...' },
+            { progress: 55, text: 'Adding missing keywords...' },
+            { progress: 70, text: 'Improving action verbs...' },
+            { progress: 85, text: 'Adding quantifiable results...' },
+            { progress: 95, text: 'Finalizing optimized resume...' }
+        ];
+        
+        let currentStage = 0;
+        
+        // Update progress bar every 700ms to simulate optimization stages
+        const progressInterval = setInterval(function() {
+            if (currentStage < stages.length) {
+                const stage = stages[currentStage];
+                updateProgress(stage.progress, stage.text);
+                currentStage++;
+            } else {
+                // Complete the progress bar when all stages are done
+                updateProgress(100, 'Optimization complete!');
+                clearInterval(progressInterval);
+            }
+        }, 700);
+        
+        function updateProgress(percent, text) {
+            if (progressBar && stageText) {
+                progressBar.style.width = percent + '%';
+                progressBar.setAttribute('aria-valuenow', percent);
+                progressBar.textContent = percent + '%';
+                stageText.textContent = text;
+            }
+        }
+    }
+}
+</script>
+{% endblock %} 
